@@ -2,6 +2,7 @@ package com.asli.demo.controller;
 
 import com.asli.demo.dto.UserDto;
 import com.asli.demo.entity.User;
+import com.asli.demo.mapper.UserMapper;
 import com.asli.demo.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,20 +15,19 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final UserService userService;
+    private final UserMapper userMapper; // Mapper eklendi
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     // CREATE
     @PostMapping
     public UserDto createUser(@RequestBody UserDto userDto) {
-        User user = new User();
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
+        User user = userMapper.toEntity(userDto);
         User saved = userService.createUser(user);
-
-        return mapToDto(saved);
+        return userMapper.toDto(saved);
     }
 
     // READ - all
@@ -35,7 +35,7 @@ public class UserController {
     public List<UserDto> getAllUsers() {
         return userService.getAllUsers()
                 .stream()
-                .map(this::mapToDto)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -43,18 +43,15 @@ public class UserController {
     @GetMapping("/{id}")
     public Optional<UserDto> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
-                .map(this::mapToDto);
+                .map(userMapper::toDto);
     }
 
     // UPDATE
     @PutMapping("/{id}")
     public UserDto updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        User user = new User();
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
-
+        User user = userMapper.toEntity(userDto);
         User updated = userService.updateUser(id, user);
-        return mapToDto(updated);
+        return userMapper.toDto(updated);
     }
 
     // DELETE
@@ -62,14 +59,4 @@ public class UserController {
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
     }
-
-    // Mapping metodları
-    private UserDto mapToDto(User user) {
-        UserDto dto = new UserDto();
-        dto.setId(user.getId());
-        dto.setName(user.getName());
-        dto.setEmail(user.getEmail());
-        return dto;
-    }
 }
-
