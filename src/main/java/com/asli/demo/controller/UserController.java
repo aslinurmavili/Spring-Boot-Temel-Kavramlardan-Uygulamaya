@@ -6,6 +6,7 @@ import com.asli.demo.mapper.UserMapper;
 import com.asli.demo.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ public class UserController {
 
     // CREATE
     @PostMapping
-    public UserDto createUser(@RequestBody UserDto userDto) {
+    public UserDto createUser(@Valid @RequestBody UserDto userDto) {
         User user = userMapper.toEntity(userDto);
         User saved = userService.createUser(user);
         return userMapper.toDto(saved);
@@ -48,7 +49,7 @@ public class UserController {
 
     // UPDATE
     @PutMapping("/{id}")
-    public UserDto updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+    public UserDto updateUser(@PathVariable Long id, @Valid @RequestBody UserDto userDto) {
         User user = userMapper.toEntity(userDto);
         User updated = userService.updateUser(id, user);
         return userMapper.toDto(updated);
